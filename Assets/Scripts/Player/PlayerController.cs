@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private float currentXPosition;
 
     [Header("Jump")]
+    [SerializeField] private bool isGrounded = true;
     [SerializeField] private float jumpForce = 10f;
     private float currentYPosition;
 
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
     }
     private void Start()
     {
@@ -40,6 +42,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Update()
     {
+        isGrounded = controller.isGrounded;
         if(!isSliding)
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -53,14 +56,19 @@ public class PlayerController : MonoBehaviour
         controller.Move(moveVector);
         Jump();
         Slide();
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetFloat("Speed", controller.velocity.magnitude);
     }
 
     private void Jump()
     {
-        if (controller.isGrounded)
+        if (controller.isGrounded && !isSliding)
         {
-            if(Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
                 currentYPosition = jumpForce;
+                animator.SetTrigger("Jump");
+            }
         }
         else
             currentYPosition -= jumpForce * 2 * Time.deltaTime;
@@ -83,6 +91,7 @@ public class PlayerController : MonoBehaviour
             isSliding = true;
             controller.height = colliderHeight/2;
             controller.center = new Vector3(0, colliderCenterY/2, 0);
+            animator.SetTrigger("Slide");
         }
     }
 
