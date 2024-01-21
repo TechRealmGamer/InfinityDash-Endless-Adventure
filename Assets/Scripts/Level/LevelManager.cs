@@ -25,6 +25,6 @@ public class LevelManager : MonoBehaviour
     {
         GameObject floor = floorsPool.GetFromPool();
         floor.transform.position = Vector3.forward * currentPositionForFloor;
-        currentPositionForFloor += 50;
+        currentPositionForFloor += 100;
     }
 }

@@ -107,4 +107,23 @@ public class PlayerController : MonoBehaviour
         else
             targetXPosition = 0;
     }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if(hit.gameObject.tag == "Obstacle")
+        {
+            controller.enabled = false;
+            animator.enabled = false;
+            GetComponentInChildren<Rigidbody>().AddForce(hit.point * 100f);
+            enabled = false;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.tag == "GoldCoin")
+        {
+            Destroy(other.gameObject);
+        }
+    }
 }
