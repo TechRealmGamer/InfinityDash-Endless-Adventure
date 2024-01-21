@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -26,5 +27,10 @@ public class LevelManager : MonoBehaviour
         GameObject floor = floorsPool.GetFromPool();
         floor.transform.position = Vector3.forward * currentPositionForFloor;
         currentPositionForFloor += 100;
+    }
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

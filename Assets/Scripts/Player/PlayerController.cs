@@ -13,11 +13,14 @@ public class PlayerController : MonoBehaviour
     private int targetLane = 1;
     private float targetXPosition;
     private float currentXPosition;
+    [SerializeField] private AudioClip laneChangeSound;
 
     [Header("Jump")]
     [SerializeField] private bool isGrounded = true;
     [SerializeField] private float jumpForce = 10f;
     private float currentYPosition;
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip landSound;
 
     [Header("Slide")]
     [SerializeField] private float slideTime = 1f;
@@ -25,17 +28,24 @@ public class PlayerController : MonoBehaviour
     public bool isSliding = false;
     private float colliderCenterY;
     private float colliderHeight;
+    [SerializeField] private AudioClip slideSound;
+
+    [Header("Collision Audio Clips")]
+    [SerializeField] private AudioClip coinSound;
+    [SerializeField] private AudioClip deathSound;
 
     // Components
     private PlayerInputManager playerInputManager;
     private CharacterController controller;
     private Animator animator;
+    private AudioSource audioSource;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         playerInputManager = GetComponent<PlayerInputManager>();
+        audioSource = GetComponent<AudioSource>();
     }
     private void Start()
     {
@@ -66,6 +76,7 @@ public class PlayerController : MonoBehaviour
             {
                 currentYPosition = jumpForce;
                 animator.CrossFadeInFixedTime("Jump", 0.1f);
+                audioSource.PlayOneShot(jumpSound);
             }
         }
         else
@@ -91,6 +102,7 @@ public class PlayerController : MonoBehaviour
             controller.height = colliderHeight/2;
             controller.center = new Vector3(0, colliderCenterY/2, 0);
             animator.SetTrigger("Slide");
+            AudioSource.PlayClipAtPoint(slideSound, transform.position);
             playerInputManager.slide = false;
         }
     }
@@ -108,15 +120,18 @@ public class PlayerController : MonoBehaviour
             targetXPosition = 0;
 
         playerInputManager.switchLane = 0;
+        audioSource.PlayOneShot(laneChangeSound);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if(hit.gameObject.tag == "Obstacle")
         {
+            audioSource.PlayOneShot(deathSound);
             controller.enabled = false;
             animator.enabled = false;
             GetComponentInChildren<Rigidbody>().AddForce(hit.point * 100f);
+            FindObjectOfType<LevelManager>().Invoke("RestartLevel", 4f);
             enabled = false;
         }
     }
@@ -125,7 +140,18 @@ public class PlayerController : MonoBehaviour
     {
         if(other.gameObject.tag == "GoldCoin")
         {
+            audioSource.PlayOneShot(coinSound);
             Destroy(other.gameObject);
         }
+    }
+
+    public void LandingSound()
+    {
+        audioSource.PlayOneShot(landSound);
+    }
+
+    public void Footstep()
+    {
+        audioSource.PlayOneShot(landSound);
     }
 }
