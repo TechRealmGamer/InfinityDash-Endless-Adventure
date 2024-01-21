@@ -22,11 +22,12 @@ public class PlayerController : MonoBehaviour
     [Header("Slide")]
     [SerializeField] private float slideTime = 1f;
     private float slideTimer = 0f;
-    private bool isSliding = false;
+    public bool isSliding = false;
     private float colliderCenterY;
     private float colliderHeight;
 
     // Components
+    private PlayerInputManager playerInputManager;
     private CharacterController controller;
     private Animator animator;
 
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        playerInputManager = GetComponent<PlayerInputManager>();
     }
     private void Start()
     {
@@ -43,13 +45,9 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         isGrounded = controller.isGrounded;
-        if(!isSliding)
-        {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-                ChangeLane(-1);
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-                ChangeLane(1);
-        }
+
+        if (playerInputManager.switchLane != 0)
+            ChangeLane(playerInputManager.switchLane);
 
         currentXPosition = Mathf.Lerp(currentXPosition, targetXPosition, Time.deltaTime * dodgeSpeed);
         Vector3 moveVector = new Vector3(currentXPosition - transform.position.x, currentYPosition * Time.deltaTime, forwardSpeed*Time.deltaTime);
@@ -64,14 +62,15 @@ public class PlayerController : MonoBehaviour
     {
         if (controller.isGrounded && !isSliding)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (playerInputManager.jump)
             {
                 currentYPosition = jumpForce;
-                animator.SetTrigger("Jump");
+                animator.CrossFadeInFixedTime("Jump", 0.1f);
             }
         }
         else
             currentYPosition -= jumpForce * 2 * Time.deltaTime;
+        playerInputManager.jump = false;
     }
 
     private void Slide()
@@ -84,7 +83,7 @@ public class PlayerController : MonoBehaviour
             controller.height = colliderHeight;
             controller.center = new Vector3(0, colliderCenterY, 0);
         }
-        if(Input.GetKeyDown(KeyCode.DownArrow))
+        if(playerInputManager.slide)
         {
             slideTimer = slideTime;
             currentYPosition = -10f;
@@ -92,6 +91,7 @@ public class PlayerController : MonoBehaviour
             controller.height = colliderHeight/2;
             controller.center = new Vector3(0, colliderCenterY/2, 0);
             animator.SetTrigger("Slide");
+            playerInputManager.slide = false;
         }
     }
 
@@ -106,6 +106,8 @@ public class PlayerController : MonoBehaviour
             targetXPosition = laneDistance;
         else
             targetXPosition = 0;
+
+        playerInputManager.switchLane = 0;
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
