@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance { get; private set; }
+
     [Header("Movement")]
     [SerializeField] private float forwardSpeed = 10f;
     [SerializeField] private float dodgeSpeed = 10f;
@@ -42,6 +44,10 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance != null && Instance != this)
+            Destroy(Instance.gameObject);
+        Instance = this;
+
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         playerInputManager = GetComponent<PlayerInputManager>();
@@ -103,8 +109,8 @@ public class PlayerController : MonoBehaviour
             controller.center = new Vector3(0, colliderCenterY/2, 0);
             animator.SetTrigger("Slide");
             AudioSource.PlayClipAtPoint(slideSound, transform.position);
-            playerInputManager.slide = false;
         }
+        playerInputManager.slide = false;
     }
 
     private void ChangeLane(int direction)
@@ -133,15 +139,6 @@ public class PlayerController : MonoBehaviour
             GetComponentInChildren<Rigidbody>().AddForce(hit.point * 100f);
             FindObjectOfType<LevelManager>().Invoke("RestartLevel", 4f);
             enabled = false;
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.tag == "GoldCoin")
-        {
-            audioSource.PlayOneShot(coinSound);
-            Destroy(other.gameObject);
         }
     }
 

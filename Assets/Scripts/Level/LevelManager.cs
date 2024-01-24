@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] private float currentPositionForFloor = 50;
-
     private ObjectPool floorsPool;
 
     private void Awake()
