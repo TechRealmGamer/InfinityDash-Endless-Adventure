@@ -12,19 +12,21 @@ public class MainMenuController : MonoBehaviour
 	[SerializeField] private Slider musicSlider;
 	[SerializeField] private Slider soundSlider;
 	public GameObject LoadingScreen;
-	public Image LoadingBarFill;
+	public Slider loadingBar;
+	public Text LoadingText;
 	
 
 
-	IEnumerator LoadSceneAsync(string sceneName,float delayInSeconds)
+	IEnumerator LoadSceneAsync(string sceneName)
 	{
 		AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
 		LoadingScreen.SetActive(true);
-		yield return new WaitForSeconds(delayInSeconds);
+		
 		while (!operation.isDone)
 		{
 			float progress = Mathf.Clamp01(operation.progress / .9f);
-			LoadingBarFill.fillAmount = progress;
+			loadingBar.value = progress;
+			LoadingText.text = progress * 100f + "%";
 			yield return null;
 		}
 	}
@@ -34,7 +36,7 @@ public class MainMenuController : MonoBehaviour
 
 	public void LoadScene(string sceneName)
 	{
-		StartCoroutine(LoadSceneAsync(sceneName,2f));
+		StartCoroutine(LoadSceneAsync(sceneName));
 	}
 
 	public void ExitGameBtn()
