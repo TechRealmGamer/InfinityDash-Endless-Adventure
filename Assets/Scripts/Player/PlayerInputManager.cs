@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,6 +26,8 @@ public class PlayerInputManager : MonoBehaviour
         {
             switchLane = (int) ctx.ReadValue<float>();
         };
+
+        SwipeDetection.instance.swipePerformed += Direction => TouchInput(Direction);
     }
 
     private void OnEnable()
@@ -35,5 +38,25 @@ public class PlayerInputManager : MonoBehaviour
     private void OnDisable()
     {
         playerInput.Disable();
+    }
+
+    private void TouchInput(Vector2 direction)
+    {
+        if (direction.x > 0)
+        {
+            switchLane = 1;
+        }
+        else if (direction.x < 0)
+        {
+            switchLane = -1;
+        }
+        else if (direction.y > 0)
+        {
+            jump = true;
+        }
+        else if (direction.y < 0)
+        {
+            slide = true;
+        }
     }
 }
